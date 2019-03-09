@@ -18,18 +18,18 @@ class KubernetesCliAT1105 < Formula
 
   def install
     ENV["GOPATH"] = buildpath
-    arch = MacOS.prefer_64_bit? ? "amd64" : "x86"
+    os = OS.linux? ? "linux" : "darwin"
     dir = buildpath/"src/k8s.io/kubernetes"
     dir.install buildpath.children - [buildpath/".brew_home"]
 
     cd dir do
-      # Race condition still exists in OSX Yosemite
+      # Race condition still exists in OS X Yosemite
       # Filed issue: https://github.com/kubernetes/kubernetes/issues/34635
       ENV.deparallelize { system "make", "generated_files" }
 
       # Make binary
       system "make", "kubectl"
-      bin.install "_output/local/bin/darwin/#{arch}/kubectl"
+      bin.install "_output/local/bin/#{os}/amd64/kubectl"
 
       # Install bash completion
       output = Utils.popen_read("#{bin}/kubectl completion bash")
@@ -54,6 +54,10 @@ class KubernetesCliAT1105 < Formula
 
     version_output = shell_output("#{bin}/kubectl version --client 2>&1")
     assert_match "GitTreeState:\"clean\"", version_output
-    assert_match stable.instance_variable_get(:@resource).instance_variable_get(:@specs)[:revision], version_output if build.stable?
+    if build.stable?
+      assert_match stable.instance_variable_get(:@resource)
+                         .instance_variable_get(:@specs)[:revision],
+                   version_output
+    end
   end
 end
