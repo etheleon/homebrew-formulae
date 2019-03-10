@@ -14,6 +14,7 @@ class KubernetesCli < Formula
   end
 
   # kubernetes-cli will not support go1.10 until version 1.11.x
+  # testing
   depends_on "go@1.9" => :build
 
   def install
